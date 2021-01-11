@@ -19,49 +19,83 @@
             <h1>Pokédex</h1>
         </header>
         <main>
-            <section class="row" id="listado-pokemones">
-                <!--<article class="col-xl-3 mt-2">
-                    <div
-                        class="rounded-3 p-4"
-                        style="background-color: #f0f0f0"
-                    >
-                        <div class="d-flex flex-column align-items-center">
-                            <img
-                                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png"
-                                alt="imagen de un pokemon"
-                            />
-                            <h4>Nombre</h4>
-                        </div>
-                        <div class="row mt-2">
-                            <div
-                                class="col-xl-6 d-flex justify-content-between mb-2"
-                            >
-                                <p class="mb-0">Salud:</p>
-                                <p class="mb-0">75</p>
+            <section class="row" id="listado-pokemones"></section>
+        </main>
+
+        <!-- Modal detalle pokemon -->
+        <div
+            class="modal fade"
+            id="modal-detalle-pokemon"
+            tabindex="-1"
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header border-bottom-0 p-4 pb-1">
+                        <button
+                            type="button"
+                            class="btn-close shadow-none"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body pt-0 p-4">
+                        <div>
+                            <div class="d-flex flex-column align-items-center">
+                                <img id="img" />
+                                <h4 class="text-capitalize" id="nombre"></h4>
                             </div>
-                            <div
-                                class="col-xl-6 d-flex justify-content-between mb-2"
-                            >
-                                <p class="mb-0">Ataque:</p>
-                                <p class="mb-0">49</p>
-                            </div>
-                            <div
-                                class="col-xl-6 d-flex justify-content-between"
-                            >
-                                <p class="mb-0">Defensa:</p>
-                                <p class="mb-0">49</p>
-                            </div>
-                            <div
-                                class="col-xl-6 d-flex justify-content-between"
-                            >
-                                <p class="mb-0">Velocidad:</p>
-                                <p class="mb-0">45</p>
+                            <div class="row mt-2">
+                                <div
+                                    class="col-xl-6 d-flex justify-content-between mb-2"
+                                >
+                                    <p class="mb-0">HP:</p>
+                                    <p class="mb-0" id="valor-hp"></p>
+                                </div>
+                                <div
+                                    class="col-xl-6 d-flex justify-content-between mb-2"
+                                >
+                                    <p class="mb-0">Ataque:</p>
+                                    <p class="mb-0" id="valor-ataque"></p>
+                                </div>
+                                <div
+                                    class="col-xl-6 d-flex justify-content-between mb-2"
+                                >
+                                    <p class="mb-0">Defensa:</p>
+                                    <p class="mb-0" id="valor-defensa"></p>
+                                </div>
+                                <div
+                                    class="col-xl-6 d-flex justify-content-between mb-2"
+                                >
+                                    <p class="mb-0">Velocidad:</p>
+                                    <p class="mb-0" id="valor-velocidad"></p>
+                                </div>
+                                <div
+                                    class="col-xl-6 d-flex justify-content-between"
+                                >
+                                    <p class="mb-0">Ataque Especial:</p>
+                                    <p
+                                        class="mb-0"
+                                        id="valor-ataque-especial"
+                                    ></p>
+                                </div>
+                                <div
+                                    class="col-xl-6 d-flex justify-content-between"
+                                >
+                                    <p class="mb-0">Defensa Especial:</p>
+                                    <p
+                                        class="mb-0"
+                                        id="valor-defensa-especial"
+                                    ></p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </article>-->
-            </section>
-        </main>
+                </div>
+            </div>
+        </div>
+
         <script
             src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
