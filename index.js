@@ -17,7 +17,7 @@ function mostrarListadoPokemones(pokemones) {
 
     pokemones.forEach((pokemon) => {
         listadoPokemones.innerHTML += `
-        <article class="col-xl-3 mb-4">
+        <article class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-6 mb-4">
                     <div
                         class="rounded-3 p-3"
                         style="background-color: #f0f0f0"
@@ -43,7 +43,6 @@ async function mostrarModalDetalle(e) {
     const img = document.querySelector("#img");
 
     let pokemon = await cargarPokemon(url);
-    console.log(pokemon);
 
     img.setAttribute("src", `${pokemon.sprites.front_default}`);
     img.setAttribute("alt", `Imagen frontal del pokemon ${pokemon.name}`);
