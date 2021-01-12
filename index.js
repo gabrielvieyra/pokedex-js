@@ -6,7 +6,9 @@ async function iniciar() {
     if (response.status === 200) {
         let datos = await response.json();
 
-        mostrarListadoPokemones(datos.results);
+        const { results: pokemones } = datos;
+
+        mostrarListadoPokemones(pokemones);
     } else {
         alert("Algo salio mal");
     }
@@ -16,6 +18,8 @@ function mostrarListadoPokemones(pokemones) {
     const listadoPokemones = document.querySelector("#listado-pokemones");
 
     pokemones.forEach((pokemon) => {
+        const { name, url } = pokemon;
+
         listadoPokemones.innerHTML += `
         <article class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-6 mb-4">
                     <div
@@ -23,8 +27,8 @@ function mostrarListadoPokemones(pokemones) {
                         style="background-color: #f0f0f0"
                     >
                         <div class="d-flex flex-column align-items-center">
-                            <h4 class="mb-3 text-capitalize">${pokemon.name}</h4>
-                            <button class="btn btn-danger shadow-none detalle-pokemon" data-bs-toggle="modal" data-bs-target="#modal-detalle-pokemon" data-url="${pokemon.url}">
+                            <h4 class="mb-3 text-capitalize">${name}</h4>
+                            <button class="btn btn-danger shadow-none detalle-pokemon" data-bs-toggle="modal" data-bs-target="#modal-detalle-pokemon" data-url="${url}">
                                 Ver detalle
                             </button>
                         </div>
@@ -44,27 +48,29 @@ async function mostrarModalDetalle(e) {
 
     let pokemon = await cargarPokemon(url);
 
-    img.setAttribute("src", `${pokemon.sprites.front_default}`);
-    img.setAttribute("alt", `Imagen frontal del pokemon ${pokemon.name}`);
-    document.querySelector("#nombre").innerHTML = `${pokemon.name}`;
-    document.querySelector(
-        "#valor-hp"
-    ).innerHTML = `${pokemon.stats[0].base_stat}`;
-    document.querySelector(
-        "#valor-ataque"
-    ).innerHTML = `${pokemon.stats[1].base_stat}`;
+    const {
+        name,
+        sprites: { front_default: imgPokemon },
+        stats
+    } = pokemon;
+
+    img.setAttribute("src", `${imgPokemon}`);
+    img.setAttribute("alt", `Imagen frontal del pokemon ${name}`);
+    document.querySelector("#nombre").innerHTML = `${name}`;
+    document.querySelector("#valor-hp").innerHTML = `${stats[0].base_stat}`;
+    document.querySelector("#valor-ataque").innerHTML = `${stats[1].base_stat}`;
     document.querySelector(
         "#valor-defensa"
-    ).innerHTML = `${pokemon.stats[2].base_stat}`;
+    ).innerHTML = `${stats[2].base_stat}`;
     document.querySelector(
         "#valor-velocidad"
-    ).innerHTML = `${pokemon.stats[5].base_stat}`;
+    ).innerHTML = `${stats[5].base_stat}`;
     document.querySelector(
         "#valor-ataque-especial"
-    ).innerHTML = `${pokemon.stats[3].base_stat}`;
+    ).innerHTML = `${stats[3].base_stat}`;
     document.querySelector(
         "#valor-defensa-especial"
-    ).innerHTML = `${pokemon.stats[4].base_stat}`;
+    ).innerHTML = `${stats[4].base_stat}`;
 }
 
 async function cargarPokemon(pokemon) {
