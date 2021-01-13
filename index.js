@@ -1,17 +1,107 @@
-async function iniciar() {
-    const url = "https://pokeapi.co/api/v2/pokemon/";
+const paginador = document.querySelector("#paginador");
 
-    let response = await fetch(url);
+async function iniciar() {
+    let response = await cargarPokemones();
 
     if (response.status === 200) {
         let datos = await response.json();
 
-        const { results: pokemones } = datos;
+        const {
+            count: totalPokemones,
+            results: pokemones,
+            next: urlSiguiente,
+            previous: urlAnterior
+        } = datos;
 
         mostrarListadoPokemones(pokemones);
+        mostrarPaginador(
+            totalPokemones,
+            urlSiguiente,
+            urlAnterior,
+            cambiarPagina
+        );
     } else {
         alert("Algo salio mal");
     }
+}
+
+function crearItemPaginador(texto, url = "#") {
+    paginador.innerHTML += `
+    <li class="page-item mb-3">
+    <a class="page-link text-dark shadow-none" href="${url}" data-pagina="${texto}"
+        >${texto}</a
+    >
+</li>
+    `;
+}
+
+function cambiarPagina(e) {
+    e.preventDefault();
+
+    const POKEMONES_POR_PAGINA = 20;
+    let offset;
+    let limit = POKEMONES_POR_PAGINA;
+    const href = e.target.getAttribute("href");
+
+    if (href === "#") {
+        offset = POKEMONES_POR_PAGINA * Number(e.target.dataset.pagina);
+    } else {
+        const parametros = obtenerParametrosDeURL(href);
+
+        offset = parametros.offset;
+        limit = parametros.limit;
+    }
+
+    cargarPokemones(offset, limit);
+}
+
+function mostrarPaginador(
+    totalPokemones,
+    urlSiguiente,
+    urlAnterior,
+    manejadorCambioPagina
+) {
+    const POKEMONES_POR_PAGINA = 20;
+    const totalPaginas = Math.ceil(totalPokemones / POKEMONES_POR_PAGINA);
+
+    if (urlAnterior) {
+        crearItemPaginador("Anterior", urlAnterior);
+    }
+
+    for (let i = 0; i < totalPaginas; i++) {
+        const numeroPagina = i + 1;
+
+        crearItemPaginador(numeroPagina);
+    }
+
+    if (urlSiguiente) {
+        crearItemPaginador("Siguiente", urlSiguiente);
+    }
+
+    paginador.addEventListener("click", manejadorCambioPagina);
+}
+
+function obtenerParametrosDeURL(url) {
+    let offset;
+    let limit;
+
+    try {
+        offset = /offset=([0-9]+)/gi.exec(url).pop();
+        limit = /limit=([0-9]+)/gi.exec(url).pop();
+    } catch (e) {
+        offset = undefined;
+        limit = undefined;
+    }
+
+    return { offset, limit };
+}
+
+async function cargarPokemones(offset = 0, limit = 20) {
+    let response = await fetch(
+        `https://pokeapi.co/api/v2/pokemon/?offset=${offset}&limit=${limit}`
+    );
+
+    return response;
 }
 
 function mostrarListadoPokemones(pokemones) {
