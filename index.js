@@ -1,21 +1,115 @@
-async function iniciar() {
-    const url = "https://pokeapi.co/api/v2/pokemon/";
+const paginador = document.querySelector("#paginador");
 
-    let response = await fetch(url);
+async function iniciar() {
+    let response = await cargarPokemones();
 
     if (response.status === 200) {
         let datos = await response.json();
 
-        mostrarListadoPokemones(datos.results);
+        const {
+            count: totalPokemones,
+            results: pokemones,
+            next: urlSiguiente,
+            previous: urlAnterior
+        } = datos;
+
+        mostrarListadoPokemones(pokemones);
+        mostrarPaginador(
+            totalPokemones,
+            urlSiguiente,
+            urlAnterior,
+            cambiarPagina
+        );
     } else {
         alert("Algo salio mal");
     }
+}
+
+function crearItemPaginador(texto, url = "#") {
+    paginador.innerHTML += `
+    <li class="page-item mb-3">
+    <a class="page-link text-dark shadow-none" href="${url}" data-pagina="${texto}"
+        >${texto}</a
+    >
+</li>
+    `;
+}
+
+function cambiarPagina(e) {
+    e.preventDefault();
+
+    const POKEMONES_POR_PAGINA = 20;
+    let offset;
+    let limit = POKEMONES_POR_PAGINA;
+    const href = e.target.getAttribute("href");
+
+    if (href === "#") {
+        offset = POKEMONES_POR_PAGINA * Number(e.target.dataset.pagina);
+    } else {
+        const parametros = obtenerParametrosDeURL(href);
+
+        offset = parametros.offset;
+        limit = parametros.limit;
+    }
+
+    cargarPokemones(offset, limit);
+}
+
+function mostrarPaginador(
+    totalPokemones,
+    urlSiguiente,
+    urlAnterior,
+    manejadorCambioPagina
+) {
+    const POKEMONES_POR_PAGINA = 20;
+    const totalPaginas = Math.ceil(totalPokemones / POKEMONES_POR_PAGINA);
+
+    if (urlAnterior) {
+        crearItemPaginador("Anterior", urlAnterior);
+    }
+
+    for (let i = 0; i < totalPaginas; i++) {
+        const numeroPagina = i + 1;
+
+        crearItemPaginador(numeroPagina);
+    }
+
+    if (urlSiguiente) {
+        crearItemPaginador("Siguiente", urlSiguiente);
+    }
+
+    paginador.addEventListener("click", manejadorCambioPagina);
+}
+
+function obtenerParametrosDeURL(url) {
+    let offset;
+    let limit;
+
+    try {
+        offset = /offset=([0-9]+)/gi.exec(url).pop();
+        limit = /limit=([0-9]+)/gi.exec(url).pop();
+    } catch (e) {
+        offset = undefined;
+        limit = undefined;
+    }
+
+    return { offset, limit };
+}
+
+async function cargarPokemones(offset = 0, limit = 20) {
+    let response = await fetch(
+        `https://pokeapi.co/api/v2/pokemon/?offset=${offset}&limit=${limit}`
+    );
+
+    return response;
 }
 
 function mostrarListadoPokemones(pokemones) {
     const listadoPokemones = document.querySelector("#listado-pokemones");
 
     pokemones.forEach((pokemon) => {
+        const { name, url } = pokemon;
+
         listadoPokemones.innerHTML += `
         <article class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-6 mb-4">
                     <div
@@ -23,8 +117,8 @@ function mostrarListadoPokemones(pokemones) {
                         style="background-color: #f0f0f0"
                     >
                         <div class="d-flex flex-column align-items-center">
-                            <h4 class="mb-3 text-capitalize">${pokemon.name}</h4>
-                            <button class="btn btn-danger shadow-none detalle-pokemon" data-bs-toggle="modal" data-bs-target="#modal-detalle-pokemon" data-url="${pokemon.url}">
+                            <h4 class="mb-3 text-capitalize">${name}</h4>
+                            <button class="btn btn-danger shadow-none detalle-pokemon" data-bs-toggle="modal" data-bs-target="#modal-detalle-pokemon" data-url="${url}">
                                 Ver detalle
                             </button>
                         </div>
@@ -44,27 +138,29 @@ async function mostrarModalDetalle(e) {
 
     let pokemon = await cargarPokemon(url);
 
-    img.setAttribute("src", `${pokemon.sprites.front_default}`);
-    img.setAttribute("alt", `Imagen frontal del pokemon ${pokemon.name}`);
-    document.querySelector("#nombre").innerHTML = `${pokemon.name}`;
-    document.querySelector(
-        "#valor-hp"
-    ).innerHTML = `${pokemon.stats[0].base_stat}`;
-    document.querySelector(
-        "#valor-ataque"
-    ).innerHTML = `${pokemon.stats[1].base_stat}`;
+    const {
+        name,
+        sprites: { front_default: imgPokemon },
+        stats
+    } = pokemon;
+
+    img.setAttribute("src", `${imgPokemon}`);
+    img.setAttribute("alt", `Imagen frontal del pokemon ${name}`);
+    document.querySelector("#nombre").innerHTML = `${name}`;
+    document.querySelector("#valor-hp").innerHTML = `${stats[0].base_stat}`;
+    document.querySelector("#valor-ataque").innerHTML = `${stats[1].base_stat}`;
     document.querySelector(
         "#valor-defensa"
-    ).innerHTML = `${pokemon.stats[2].base_stat}`;
+    ).innerHTML = `${stats[2].base_stat}`;
     document.querySelector(
         "#valor-velocidad"
-    ).innerHTML = `${pokemon.stats[5].base_stat}`;
+    ).innerHTML = `${stats[5].base_stat}`;
     document.querySelector(
         "#valor-ataque-especial"
-    ).innerHTML = `${pokemon.stats[3].base_stat}`;
+    ).innerHTML = `${stats[3].base_stat}`;
     document.querySelector(
         "#valor-defensa-especial"
-    ).innerHTML = `${pokemon.stats[4].base_stat}`;
+    ).innerHTML = `${stats[4].base_stat}`;
 }
 
 async function cargarPokemon(pokemon) {
