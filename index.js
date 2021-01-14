@@ -1,41 +1,21 @@
-const paginador = document.querySelector("#paginador");
-
 async function iniciar() {
+    const TOTAL_POKEMONES = 900;
+
     let response = await cargarPokemones();
 
     if (response.status === 200) {
         let datos = await response.json();
 
-        const {
-            count: totalPokemones,
-            results: pokemones,
-            next: urlSiguiente,
-            previous: urlAnterior
-        } = datos;
+        const { results: pokemones } = datos;
 
         mostrarListadoPokemones(pokemones);
-        mostrarPaginador(
-            totalPokemones,
-            urlSiguiente,
-            urlAnterior,
-            cambiarPagina
-        );
+        mostrarPaginador(TOTAL_POKEMONES);
     } else {
         alert("Algo salio mal");
     }
 }
 
-function crearItemPaginador(texto, url = "#") {
-    paginador.innerHTML += `
-    <li class="page-item mb-3">
-    <a class="page-link text-dark shadow-none" href="${url}" data-pagina="${texto}"
-        >${texto}</a
-    >
-</li>
-    `;
-}
-
-function cambiarPagina(e) {
+async function cambiarPagina(e) {
     e.preventDefault();
 
     const POKEMONES_POR_PAGINA = 20;
@@ -52,33 +32,38 @@ function cambiarPagina(e) {
         limit = parametros.limit;
     }
 
-    cargarPokemones(offset, limit);
+    document.querySelector("#listado-pokemones").innerHTML = "";
+
+    let response = await cargarPokemones(offset, limit);
+    let datos = await response.json();
+
+    const { results: pokemonesNuevos } = datos;
+    mostrarListadoPokemones(pokemonesNuevos);
 }
 
-function mostrarPaginador(
-    totalPokemones,
-    urlSiguiente,
-    urlAnterior,
-    manejadorCambioPagina
-) {
+function crearItemPaginador(texto) {
+    paginador.innerHTML += `
+    <li class="page-item mb-3">
+    <a class="page-link text-dark shadow-none" href="#" data-pagina="${texto}"
+        >${texto}</a
+    >
+</li>
+    `;
+}
+
+function mostrarPaginador(totalPokemones) {
     const POKEMONES_POR_PAGINA = 20;
     const totalPaginas = Math.ceil(totalPokemones / POKEMONES_POR_PAGINA);
 
-    if (urlAnterior) {
-        crearItemPaginador("Anterior", urlAnterior);
-    }
-
     for (let i = 0; i < totalPaginas; i++) {
-        const numeroPagina = i + 1;
+        const numeroPagina = i;
 
         crearItemPaginador(numeroPagina);
     }
 
-    if (urlSiguiente) {
-        crearItemPaginador("Siguiente", urlSiguiente);
-    }
-
-    paginador.addEventListener("click", manejadorCambioPagina);
+    document.querySelectorAll("a").forEach((element) => {
+        element.addEventListener("click", cambiarPagina);
+    });
 }
 
 function obtenerParametrosDeURL(url) {
@@ -117,8 +102,9 @@ function mostrarListadoPokemones(pokemones) {
                         style="background-color: #f0f0f0"
                     >
                         <div class="d-flex flex-column align-items-center">
+                            <img src="" alt="Imagen frontal del pokemon ${name}" id="img-listado-pokemones" data-url="${url}">
                             <h4 class="mb-3 text-capitalize">${name}</h4>
-                            <button class="btn btn-danger shadow-none detalle-pokemon" data-bs-toggle="modal" data-bs-target="#modal-detalle-pokemon" data-url="${url}">
+                            <button class="btn btn-danger shadow-none detalle-pokemon mb-3" data-bs-toggle="modal" data-bs-target="#modal-detalle-pokemon" data-url="${url}">
                                 Ver detalle
                             </button>
                         </div>
@@ -127,8 +113,24 @@ function mostrarListadoPokemones(pokemones) {
         `;
     });
 
+    cargarImgPokemones();
+
     document.querySelectorAll(".detalle-pokemon").forEach((btn) => {
         btn.addEventListener("click", mostrarModalDetalle);
+    });
+}
+
+function cargarImgPokemones() {
+    document.querySelectorAll("#img-listado-pokemones").forEach((img) => {
+        const urlPokemon = img.getAttribute("data-url");
+
+        cargarPokemon(urlPokemon).then((pokemon) => {
+            const {
+                sprites: { front_default: imgPokemon }
+            } = pokemon;
+
+            img.src = imgPokemon;
+        });
     });
 }
 
