@@ -102,8 +102,9 @@ function mostrarListadoPokemones(pokemones) {
                         style="background-color: #f0f0f0"
                     >
                         <div class="d-flex flex-column align-items-center">
+                            <img src="" alt="Imagen frontal del pokemon ${name}" id="img-listado-pokemones" data-url="${url}">
                             <h4 class="mb-3 text-capitalize">${name}</h4>
-                            <button class="btn btn-danger shadow-none detalle-pokemon" data-bs-toggle="modal" data-bs-target="#modal-detalle-pokemon" data-url="${url}">
+                            <button class="btn btn-danger shadow-none detalle-pokemon mb-3" data-bs-toggle="modal" data-bs-target="#modal-detalle-pokemon" data-url="${url}">
                                 Ver detalle
                             </button>
                         </div>
@@ -112,8 +113,24 @@ function mostrarListadoPokemones(pokemones) {
         `;
     });
 
+    cargarImgPokemones();
+
     document.querySelectorAll(".detalle-pokemon").forEach((btn) => {
         btn.addEventListener("click", mostrarModalDetalle);
+    });
+}
+
+function cargarImgPokemones() {
+    document.querySelectorAll("#img-listado-pokemones").forEach((img) => {
+        const urlPokemon = img.getAttribute("data-url");
+
+        cargarPokemon(urlPokemon).then((pokemon) => {
+            const {
+                sprites: { front_default: imgPokemon }
+            } = pokemon;
+
+            img.src = imgPokemon;
+        });
     });
 }
 
