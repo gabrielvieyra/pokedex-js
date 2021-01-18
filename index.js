@@ -6,10 +6,10 @@ async function iniciar() {
     if (response.status === 200) {
         let datos = await response.json();
 
-        const { results: pokemones } = datos;
+        const { results: pokemones, next, previous } = datos;
 
         mostrarListadoPokemones(pokemones);
-        mostrarPaginador(TOTAL_POKEMONES);
+        mostrarPaginador(TOTAL_POKEMONES, next, previous);
     } else {
         alert("Algo salio mal");
     }
@@ -41,19 +41,41 @@ async function cambiarPagina(e) {
     mostrarListadoPokemones(pokemonesNuevos);
 }
 
+function cambiarPaginaAnterior(e) {
+    e.preventDefault();
+
+    console.log(e.target.disabled);
+}
+
 function crearItemPaginador(texto) {
     paginador.innerHTML += `
     <li class="page-item mb-3">
-    <a class="page-link text-dark shadow-none" href="#" data-pagina="${texto}"
+    <a class="page-link text-dark shadow-none item-paginador" href="#" data-pagina="${texto}"
         >${texto}</a
     >
 </li>
     `;
 }
 
-function mostrarPaginador(totalPokemones) {
+function crearItemAnteriorSiguiente(texto, id, url) {
+    paginador.innerHTML += `
+    <li class="page-item mb-3">
+    <a class="page-link text-dark shadow-none btn" href="#" data-url="${url}" id="${id}" tabindex="-1" aria-disabled="true" role="button"
+        >${texto}</a
+    >
+</li>
+    `;
+}
+
+function mostrarPaginador(totalPokemones, urlSiguiente, urlAnterior) {
     const POKEMONES_POR_PAGINA = 20;
     const totalPaginas = Math.ceil(totalPokemones / POKEMONES_POR_PAGINA);
+
+    crearItemAnteriorSiguiente(
+        "Anterior",
+        "item-paginador-anterior",
+        urlAnterior
+    );
 
     for (let i = 0; i < totalPaginas; i++) {
         const numeroPagina = i;
@@ -61,9 +83,23 @@ function mostrarPaginador(totalPokemones) {
         crearItemPaginador(numeroPagina);
     }
 
-    document.querySelectorAll("a").forEach((element) => {
+    crearItemAnteriorSiguiente(
+        "Siguiente",
+        "item-paginador-siguiente",
+        urlSiguiente
+    );
+
+    document.querySelectorAll(".item-paginador").forEach((element) => {
         element.addEventListener("click", cambiarPagina);
     });
+
+    const itemAnterior = document.querySelector("#item-paginador-anterior");
+
+    if (itemAnterior.dataset.url === "null") {
+        itemAnterior.classList.add("disabled");
+    }
+
+    itemAnterior.addEventListener("click", cambiarPaginaAnterior);
 }
 
 function obtenerParametrosDeURL(url) {
