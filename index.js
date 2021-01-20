@@ -1,3 +1,5 @@
+let urlAnterior;
+
 async function iniciar() {
     const TOTAL_POKEMONES = 900;
 
@@ -6,7 +8,9 @@ async function iniciar() {
     if (response.status === 200) {
         let datos = await response.json();
 
-        const { results: pokemones } = datos;
+        const { results: pokemones, previous } = datos;
+
+        urlAnterior = previous;
 
         mostrarListadoPokemones(pokemones);
         mostrarPaginador(TOTAL_POKEMONES);
@@ -22,6 +26,9 @@ async function cambiarPagina(e) {
     let offset;
     let limit = POKEMONES_POR_PAGINA;
     const href = e.target.getAttribute("href");
+    const itemPaginadorAnterior = document.querySelector(
+        "#item-paginador-anterior"
+    );
 
     if (href === "#") {
         offset = POKEMONES_POR_PAGINA * Number(e.target.dataset.pagina);
@@ -37,14 +44,58 @@ async function cambiarPagina(e) {
     let response = await cargarPokemones(offset, limit);
     let datos = await response.json();
 
-    const { results: pokemonesNuevos } = datos;
+    const { results: pokemonesNuevos, previous } = datos;
+
+    urlAnterior = previous;
+
+    if (urlAnterior === null) {
+        itemPaginadorAnterior.classList.add("d-none");
+    } else {
+        itemPaginadorAnterior.classList.remove("d-none");
+    }
+
     mostrarListadoPokemones(pokemonesNuevos);
+}
+
+async function cambiarPaginaAnterior(e) {
+    e.target.setAttribute("data-url", `${urlAnterior}`);
+    urlAnterior = e.target.getAttribute("data-url");
+    const itemPaginadorAnterior = document.querySelector(
+        "#item-paginador-anterior"
+    );
+
+    document.querySelector("#listado-pokemones").innerHTML = "";
+
+    let response = await fetch(urlAnterior);
+    let datos = await response.json();
+
+    const { results, previous } = datos;
+
+    urlAnterior = previous;
+
+    if (urlAnterior === null) {
+        itemPaginadorAnterior.classList.add("d-none");
+    } else {
+        itemPaginadorAnterior.classList.remove("d-none");
+    }
+
+    mostrarListadoPokemones(results);
 }
 
 function crearItemPaginador(texto) {
     paginador.innerHTML += `
     <li class="page-item mb-3">
-    <a class="page-link text-dark shadow-none" href="#" data-pagina="${texto}"
+    <a class="page-link text-dark shadow-none item-paginador" href="#" data-pagina="${texto}"
+        >${texto + 1}</a
+    >
+</li>
+    `;
+}
+
+function crearItemAnteriorSiguiente(texto, id) {
+    paginador.innerHTML += `
+    <li class="page-item mb-3">
+    <a class="page-link text-dark shadow-none" href="#" id="${id}" data-url=""
         >${texto}</a
     >
 </li>
@@ -55,15 +106,29 @@ function mostrarPaginador(totalPokemones) {
     const POKEMONES_POR_PAGINA = 20;
     const totalPaginas = Math.ceil(totalPokemones / POKEMONES_POR_PAGINA);
 
+    crearItemAnteriorSiguiente("Anterior", "item-paginador-anterior");
+
+    if (urlAnterior === null) {
+        document
+            .querySelector("#item-paginador-anterior")
+            .classList.add("d-none");
+    }
+
     for (let i = 0; i < totalPaginas; i++) {
         const numeroPagina = i;
 
         crearItemPaginador(numeroPagina);
     }
 
-    document.querySelectorAll("a").forEach((element) => {
+    crearItemAnteriorSiguiente("Siguiente", "item-paginador-siguiente");
+
+    document.querySelectorAll(".item-paginador").forEach((element) => {
         element.addEventListener("click", cambiarPagina);
     });
+
+    document
+        .querySelector("#item-paginador-anterior")
+        .addEventListener("click", cambiarPaginaAnterior);
 }
 
 function obtenerParametrosDeURL(url) {
