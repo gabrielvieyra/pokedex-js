@@ -26,6 +26,9 @@ async function cambiarPagina(e) {
     let offset;
     let limit = POKEMONES_POR_PAGINA;
     const href = e.target.getAttribute("href");
+    const itemPaginadorAnterior = document.querySelector(
+        "#item-paginador-anterior"
+    );
 
     if (href === "#") {
         offset = POKEMONES_POR_PAGINA * Number(e.target.dataset.pagina);
@@ -45,14 +48,21 @@ async function cambiarPagina(e) {
 
     urlAnterior = previous;
 
+    if (urlAnterior === null) {
+        itemPaginadorAnterior.classList.add("d-none");
+    } else {
+        itemPaginadorAnterior.classList.remove("d-none");
+    }
+
     mostrarListadoPokemones(pokemonesNuevos);
 }
 
 async function cambiarPaginaAnterior(e) {
-    e.preventDefault();
-
     e.target.setAttribute("data-url", `${urlAnterior}`);
     urlAnterior = e.target.getAttribute("data-url");
+    const itemPaginadorAnterior = document.querySelector(
+        "#item-paginador-anterior"
+    );
 
     document.querySelector("#listado-pokemones").innerHTML = "";
 
@@ -61,8 +71,12 @@ async function cambiarPaginaAnterior(e) {
 
     const { results, previous } = datos;
 
-    if (previous === null) {
-        console.log("hola");
+    urlAnterior = previous;
+
+    if (urlAnterior === null) {
+        itemPaginadorAnterior.classList.add("d-none");
+    } else {
+        itemPaginadorAnterior.classList.remove("d-none");
     }
 
     mostrarListadoPokemones(results);
@@ -93,6 +107,12 @@ function mostrarPaginador(totalPokemones) {
     const totalPaginas = Math.ceil(totalPokemones / POKEMONES_POR_PAGINA);
 
     crearItemAnteriorSiguiente("Anterior", "item-paginador-anterior");
+
+    if (urlAnterior === null) {
+        document
+            .querySelector("#item-paginador-anterior")
+            .classList.add("d-none");
+    }
 
     for (let i = 0; i < totalPaginas; i++) {
         const numeroPagina = i;
