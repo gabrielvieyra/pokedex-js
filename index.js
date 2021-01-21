@@ -78,6 +78,18 @@ async function cambiarPaginaAnterior(e) {
         "#item-paginador-anterior"
     );
 
+    document.querySelectorAll(".item-paginador").forEach((element) => {
+        if (element.classList.contains("bg-danger")) {
+            paginaActual = Number(element.dataset.pagina - 1);
+
+            element.classList.remove("bg-danger", "text-white");
+        }
+
+        if (element.dataset.pagina == paginaActual) {
+            element.classList.add("bg-danger", "text-white");
+        }
+    });
+
     limpiarPantalla(listadoPokemones);
 
     let response = await fetch(urlAnterior);
@@ -103,6 +115,18 @@ async function cambiarPaginaSiguiente(e) {
     const itemPaginadorAnterior = document.querySelector(
         "#item-paginador-anterior"
     );
+
+    document.querySelectorAll(".item-paginador").forEach((element) => {
+        if (element.classList.contains("bg-danger")) {
+            paginaActual = Number(element.dataset.pagina) + 1;
+
+            element.classList.remove("bg-danger", "text-white");
+        }
+
+        if (element.dataset.pagina == paginaActual) {
+            element.classList.add("bg-danger", "text-white");
+        }
+    });
 
     limpiarPantalla(listadoPokemones);
 
