@@ -1,6 +1,7 @@
 const listadoPokemones = document.querySelector("#listado-pokemones");
 let urlAnterior;
 let urlSiguiente;
+let paginaActual = 0;
 
 async function iniciar() {
     const TOTAL_POKEMONES = 900;
@@ -29,9 +30,18 @@ async function cambiarPagina(e) {
     let offset;
     let limit = POKEMONES_POR_PAGINA;
     const href = e.target.getAttribute("href");
+    paginaActual = e.target.dataset.pagina;
     const itemPaginadorAnterior = document.querySelector(
         "#item-paginador-anterior"
     );
+
+    document.querySelectorAll(".item-paginador").forEach((element) => {
+        if (element.dataset.pagina === paginaActual) {
+            element.classList.add("bg-danger", "text-white");
+        } else {
+            element.classList.remove("bg-danger", "text-white");
+        }
+    });
 
     if (href === "#") {
         offset = POKEMONES_POR_PAGINA * Number(e.target.dataset.pagina);
@@ -153,6 +163,12 @@ function mostrarPaginador(totalPokemones) {
         const numeroPagina = i;
 
         crearItemPaginador(numeroPagina);
+
+        if (numeroPagina === 0) {
+            document
+                .querySelector(".item-paginador")
+                .classList.add("bg-danger", "text-white");
+        }
     }
 
     crearItemAnteriorSiguiente("Siguiente", "item-paginador-siguiente");
