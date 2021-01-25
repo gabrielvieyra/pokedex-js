@@ -81,11 +81,10 @@ async function cambiarPaginaAnterior(e) {
     document.querySelectorAll(".item-paginador").forEach((element) => {
         if (element.classList.contains("bg-danger")) {
             paginaActual = Number(element.dataset.pagina - 1);
-
             element.classList.remove("bg-danger", "text-white");
         }
 
-        if (element.dataset.pagina == paginaActual) {
+        if (element.dataset.pagina == paginaActual - 1) {
             element.classList.add("bg-danger", "text-white");
         }
     });
